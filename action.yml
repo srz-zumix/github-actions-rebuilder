@@ -10,18 +10,23 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Setup param
+      shell: bash
+      id: setup
+      run: |
+        echo "path=.rebuilder^${{ github.run_id }}" > "${{ GITHUB_OUTPUT }}"
     - name: Checkout rebuilder repository
       uses: actions/checkout@v4
       with:
         repository: ${{ env.ACTION_REPO }}
         token: ${{ inputs.github_token }}
-        path: ${{ runner.temp }}/rebuilder
+        path: ${{ steps.setup.outputs.path }}
       env:
         ACTION_REPO: ${{ github.action_repository }}
     - name: Create payload.json
       shell: bash
       run: |
-        echo '${{ inputs.inputs-json }}' > "${{ runner.temp }}/rebuilder/payload.json"
+        echo '${{ inputs.inputs-json }}' > "${{ steps.setup.outputs.path }}/payload.json"
     - name: Create workflow json
       shell: bash
       run: |
@@ -31,18 +36,20 @@ runs:
           echo "  \"workflow\": \"${{ github.event.workflow }}\","
           echo "  \"repository\": \"${{ github.event.repository }}\""
           echo "}"
-        } > "${{ runner.temp }}/rebuilder/workflow.json"
+        } > "${{ steps.setup.outputs.path }}/workflow.json"
     - name: Create PR
       shell: bash
-      working-directory: ${{ runner.temp }}/rebuilder
+      working-directory: ${{ steps.setup.outputs.path }}
       env:
         GH_TOKEN: ${{ inputs.github_token }}
       run: |
         git switch -C "rebuild/${{ github.repository }}/${{ github.run_id }}"
         git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add .
         git commit -m "Rebuild info"
         gh pr create --title "Rebuild ${{ github.repository.url }}/runs/${{ github.run_id }}" --body "Rebuild"
         gh pr close
+    - name: Delete rebuilder repository
+      run: rm -rf "${{ steps.setup.outputs.path }}"
 
