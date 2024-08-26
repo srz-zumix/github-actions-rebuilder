@@ -3,7 +3,7 @@ description: Create a workflow to rebuild the project
 inputs:
   github_token:
     description: 'GitHub token'
-    required: true
+    default: ${{ github.token }}
   inputs-json:
     default: "${{ toJson(github.event.inputs) }}"
 
