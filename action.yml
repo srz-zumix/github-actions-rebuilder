@@ -19,9 +19,11 @@ runs:
       env:
         ACTION_REPO: ${{ github.action_repository }}
     - name: Create payload.json
+      shell: bash
       run: |
         echo '${{ inputs.inputs-json }}' > "${{ runner.temp }}/rebuilder/payload.json"
     - name: Create workflow json
+      shell: bash
       run: |
         {
           echo "{"
@@ -31,6 +33,7 @@ runs:
           echo "}"
         } > "${{ runner.temp }}/rebuilder/workflow.json"
     - name: Create PR
+      shell: bash
       working-directory: ${{ runner.temp }}/rebuilder
       env:
         GH_TOKEN: ${{ inputs.github_token }}
