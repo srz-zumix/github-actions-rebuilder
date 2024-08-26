@@ -1,0 +1,45 @@
+name: Create rebuild workflow
+description: Create a workflow to rebuild the project
+inputs:
+  github_token:
+    description: 'GitHub token'
+    required: true
+  inputs-json:
+    default: "${{ toJson(github.event.inputs) }}"
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout rebuilder repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ env.ACTION_REPO }}
+        token: ${{ inputs.github_token }}
+        path: ${{ runner.temp }}/rebuilder
+      env:
+        ACTION_REPO: ${{ github.action_repository }}
+    - name: Create payload.json
+      run: |
+        echo '${{ inputs.inputs-json }}' > "${{ runner.temp }}/rebuilder/payload.json"
+    - name: Create workflow json
+      run: |
+        {
+          echo "{"
+          echo "  \"ref\": \"${{ github.ref_name }}\","
+          echo "  \"workflow\": \"${{ github.event.workflow }}\","
+          echo "  \"repository\": \"${{ github.event.repository }}\""
+          echo "}"
+        } > "${{ runner.temp }}/rebuilder/workflow.json"
+    - name: Create PR
+      working-directory: ${{ runner.temp }}/rebuilder
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      run: |
+        git switch -C "rebuild/${{ github.repository }}/${{ github.run_id }}"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git commit -m "Rebuild info"
+        gh pr create --title "Rebuild ${{ github.repository.url }}/runs/${{ github.run_id }}" --body "Rebuild"
+        gh pr close
+
