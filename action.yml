@@ -14,7 +14,7 @@ runs:
       shell: bash
       id: setup
       run: |
-        echo "path=.rebuilder^${{ github.run_id }}" > "${{ GITHUB_OUTPUT }}"
+        echo "path=.rebuilder^${{ github.run_id }}" > "${GITHUB_OUTPUT}"
     - name: Checkout rebuilder repository
       uses: actions/checkout@v4
       with:
@@ -51,5 +51,6 @@ runs:
         gh pr create --title "Rebuild ${{ github.repository.url }}/runs/${{ github.run_id }}" --body "Rebuild"
         gh pr close
     - name: Delete rebuilder repository
+      shell: bash
       run: rm -rf "${{ steps.setup.outputs.path }}"
 
