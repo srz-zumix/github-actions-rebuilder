@@ -50,7 +50,7 @@ runs:
         git commit -m "Rebuild info"
         git push -u origin HEAD
         gh pr create --title "Rebuild ${{ github.repository.url }}/runs/${{ github.run_id }}" --body "Rebuild"
-        gh pr close
+        gh pr close "$(git branch --show-current)"
     - name: Delete rebuilder repository
       shell: bash
       run: rm -rf "${{ steps.setup.outputs.path }}"
