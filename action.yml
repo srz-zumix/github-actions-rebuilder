@@ -65,6 +65,7 @@ runs:
       shell: bash
       run: rm -rf "${{ steps.setup.outputs.path }}"
     - name: Create Summary
+      shell: bash
       run: |
         echo "[Rebuild Workflow](${{ steps.create-pr.outputs.pr-url }})" > "${GITHUB_STEP_SUMMARY}"
 
