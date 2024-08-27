@@ -54,11 +54,12 @@ runs:
         BRANCH=$(git branch --show-current)
         {
           echo "Run url: ${{ github.repository.url }}/runs/${{ github.run_id }}"
-          echo "Rebuild: comment `rebuild`"
+          echo "Rebuild: comment \`rebuild\`"
           echo "Edit inputs: Restore branch && edit [payload.json](${HTTPS_URL}/edit/${BRANCH}/payload.json)"
         } > body.txt 
         gh pr create --title "Rebuild ${{ github.repository.url }}/runs/${{ github.run_id }}" --body-file body.txt
-        echo "pr-url=$(gh pr view --json url --jq .url "${BRANCH}")" >> "${GITHUB_OUTPUT}"
+        PR_URL=$(gh pr view --json url --jq .url "${BRANCH}")
+        echo "pr-url=${PR_URL}" >> "${GITHUB_OUTPUT}"
         gh pr close "${BRANCH}"
         git push origin --delete "${BRANCH}"
     - name: Delete rebuilder repository
@@ -66,6 +67,8 @@ runs:
       run: rm -rf "${{ steps.setup.outputs.path }}"
     - name: Create Summary
       shell: bash
+      env:
+        PR_URL: ${{ steps.create-pr.outputs.pr-url }}
       run: |
-        echo "[Rebuild Workflow](${{ steps.create-pr.outputs.pr-url }})" > "${GITHUB_STEP_SUMMARY}"
+        echo "[Rebuild Workflow](${PR_URL})" >> "${GITHUB_STEP_SUMMARY}"
 
