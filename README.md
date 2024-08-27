@@ -11,6 +11,17 @@
    - For owner, choose your personal account or an organization to host the repository.
    - Scroll down and click the `Create repository` button at the bottom of the form.
 1. Allow GitHub Actions to create and approve pull requests
-   - Open Settings > Actions > General
-   - Scroll down to Workflow permissions and click `Allow GitHub Actions to create and approve pull requests` button
+   - Open Settings > Actions > General .
+   - Scroll down to Workflow permissions and click `Allow GitHub Actions to create and approve pull requests` button.
    - Scroll down and click the `Save` button at the bottom of the form.
+1. Add workflow run GITHUB_TOKEN
+   - Open Settings > Secrets and variables > Actions .
+   - Register a workflow run-able GITHUB Token with the name REBUILD_GITHUB_TOKEN.
+
+### Settings
+
+1. update runs-on label (.github/workflows/*.yml)
+
+### Applying it to your workflow
+
+1. add github-actions-rebuilder step
