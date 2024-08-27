@@ -52,8 +52,10 @@ runs:
         git push -u origin HEAD
         HTTPS_URL=$(gh repo view --json url --jq .url)
         BRANCH=$(git branch --show-current)
+        WORKFLOW_PATH=${{ github.event.workflow }}
         {
           echo "Run url: ${{ github.event.repository.html_url }}/runs/${{ github.run_id }}"
+          echo "Workflow: ${{ github.event.repository.html_url }}/actions/workflows/${WORKFLOW_PATH##*/}"
           echo "Rebuild: comment \`rebuild\`"
           echo "Edit inputs: Restore branch && edit [payload.json](${HTTPS_URL}/edit/${BRANCH}/payload.json)"
         } > body.txt 
