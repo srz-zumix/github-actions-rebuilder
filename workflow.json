@@ -1,0 +1,5 @@
+{
+  "ref": "feature/impl",
+  "workflow": ".github/workflows/test.yml",
+  "repository": "srz-zumix/github-actions-rebuilder"
+}
