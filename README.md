@@ -10,9 +10,6 @@
 1. In the new tab, most of the prompts will automatically fill in for you.
    - For owner, choose your personal account or an organization to host the repository.
    - Scroll down and click the `Create repository` button at the bottom of the form.
-1. Automatically delete head branches Loading
-   - Open Settings
-   - Scroll down and click the `Automatically delete head branches Loading` button
 1. Allow GitHub Actions to create and approve pull requests
    - Open Settings > Actions > General
    - Scroll down to Workflow permissions and click `Allow GitHub Actions to create and approve pull requests` button

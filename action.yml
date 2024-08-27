@@ -34,10 +34,11 @@ runs:
           echo "{"
           echo "  \"ref\": \"${{ github.ref_name }}\","
           echo "  \"workflow\": \"${{ github.event.workflow }}\","
-          echo "  \"repository\": \"${{ github.event.repository }}\""
+          echo "  \"repository\": \"${{ github.repository }}\""
           echo "}"
         } > "${{ steps.setup.outputs.path }}/workflow.json"
     - name: Create PR
+      id: create-pr
       shell: bash
       working-directory: ${{ steps.setup.outputs.path }}
       env:
@@ -49,9 +50,21 @@ runs:
         git add .
         git commit -m "Rebuild info"
         git push -u origin HEAD
-        gh pr create --title "Rebuild ${{ github.repository.url }}/runs/${{ github.run_id }}" --body "Rebuild"
-        gh pr close "$(git branch --show-current)"
+        HTTPS_URL=$(gh repo view --json url --jq .url)
+        BRANCH=$(git branch --show-current)
+        {
+          echo "Run url: ${{ github.repository.url }}/runs/${{ github.run_id }}"
+          echo "Rebuild: comment `rebuild`"
+          echo "Edit inputs: Restore branch && edit [payload.json](${HTTPS_URL}/edit/${BRANCH}/payload.json)"
+        } > body.txt 
+        gh pr create --title "Rebuild ${{ github.repository.url }}/runs/${{ github.run_id }}" --body-file body.txt
+        echo "pr-url=$(gh pr view --json url --jq .url "${BRANCH}")"
+        gh pr close "${BRANCH}"
+        git push origin --delete "${BRANCH}"
     - name: Delete rebuilder repository
       shell: bash
       run: rm -rf "${{ steps.setup.outputs.path }}"
+    - name: Create Summary
+      run: |
+        echo "[Rebuild Workflow](${{ steps.create-pr.outputs.pr-url }})" > "${GITHUB_STEP_SUMMARY}"
 

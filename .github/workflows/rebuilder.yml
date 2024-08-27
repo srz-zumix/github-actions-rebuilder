@@ -1,0 +1,41 @@
+name: Rebuilder
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  rebuild:
+    runs-on: Linux
+    if: >-
+      github.event.issue.pull_request != null &&
+      github.event.comment.body == 'rebuild'
+    env:
+      GH_TOKEN: ${{ secrets.REBUILD_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - name: $github
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "${GITHUB_CONTEXT}"
+      - name: Get json
+        run: |
+            gh api \
+                -H "Accept: application/vnd.github.raw" \
+                "/repos/${{ github.repository }}/contents/payload.json?ref=${{ github.ref }}" \
+                > payload.json
+            gh api \
+                -H "Accept: application/vnd.github.raw" \
+                "/repos/${{ github.repository }}/contents/workflow.json?ref=${{ github.ref }}" \
+                > workflow.json
+      - name: Rebuild
+        run: |
+          REPOSITORY=$(jq -r .repository workflow.json)
+          REF=$(jq -r .ref workflow.json)
+          WORKFLOW=$(jq -r .workflow workflow.json)
+          gh workflow run \
+              --json \
+              --repo "${REPOSITORY}" \
+              --ref "${REF}" \
+              "${WORKFLOW}" < payload.json
+
+         
