@@ -1,6 +1,8 @@
 name: reviewdog
 on:
   pull_request:
+    paths:
+      - '.github/workflows/*.yml'
 
 permissions:
   checks: write
