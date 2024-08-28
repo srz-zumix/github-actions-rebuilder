@@ -27,6 +27,8 @@ jobs:
               --body "[Rebuilding](${{ github.event.repository.html_url }}/runs/${{ github.run_id }})" \
               ${{ github.event.issue.number }}
       - name: Get json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
             gh api \
                 -H "Accept: application/vnd.github.raw" \
