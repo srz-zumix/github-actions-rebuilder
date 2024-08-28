@@ -1,0 +1,5 @@
+{
+  "ref": "feature/rebuilder",
+  "workflow": ".github/workflows/test-reusable.yml",
+  "repository": "srz-zumix/changelog-template-action"
+}
