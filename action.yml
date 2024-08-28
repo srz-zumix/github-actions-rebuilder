@@ -57,7 +57,7 @@ runs:
           echo "Run url: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
           echo "Workflow: ${{ github.event.repository.html_url }}/actions/workflows/${WORKFLOW_PATH##*/}"
           echo "Rebuild: comment \`rebuild\`"
-          echo "Edit inputs: Restore branch && edit [payload.json](${HTTPS_URL}/edit/${BRANCH}/payload.json)"
+          echo "Edit inputs: Restore branch && edit [payload.json](${HTTPS_URL}/edit/${BRANCH}/payload.json) && Reopen PR"
         } > body.txt 
         gh pr create --title "Rebuild ${{ github.event.repository.html_url }}/runs/${{ github.run_id }}" --body-file body.txt
         PR_URL=$(gh pr view --json url --jq .url "${BRANCH}")
