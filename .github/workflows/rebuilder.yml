@@ -34,18 +34,19 @@ jobs:
             gh api \
                 -H "Accept: application/vnd.github.raw" \
                 "/repos/${{ github.repository }}/contents/payload.json?ref=${REBUILDER_REF}" \
-                > payload.json
+                | tee payload.json
             gh api \
                 -H "Accept: application/vnd.github.raw" \
                 "/repos/${{ github.repository }}/contents/workflow.json?ref=${REBUILDER_REF}" \
-                > workflow.json
+                | tee workflow.json
       - name: Rebuild
         env:
           GH_TOKEN: ${{ secrets.REBUILD_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           REPOSITORY=$(jq -r .repository workflow.json)
           REF=$(jq -r .ref workflow.json)
-          WORKFLOW=$(jq -r .workflow workflow.json)
+          WORKFLOW_PATH=$(jq -r .workflow workflow.json)
+          WORKFLOW=${WORKFLOW_PATH##*/}
           gh workflow run \
               --json \
               --repo "${REPOSITORY}" \
