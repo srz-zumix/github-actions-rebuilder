@@ -3,20 +3,28 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  pull-requests: write
+
 jobs:
   rebuild:
-    runs-on: Linux
+    runs-on: ubuntu-latest
     if: >-
       github.event.issue.pull_request != null &&
       github.event.comment.body == 'rebuild'
-    env:
-      GH_TOKEN: ${{ secrets.REBUILD_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
       - name: $github
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "${GITHUB_CONTEXT}"
+      - name: Comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment \
+              --body "[Rebuilding](${{ github.event.repository.html_url }}/runs/${{ github.run_id }})" \
+              ${{ github.event.issue.number }}
       - name: Get json
         run: |
             gh api \
@@ -28,6 +36,8 @@ jobs:
                 "/repos/${{ github.repository }}/contents/workflow.json?ref=${{ github.ref }}" \
                 > workflow.json
       - name: Rebuild
+        env:
+          GH_TOKEN: ${{ secrets.REBUILD_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           REPOSITORY=$(jq -r .repository workflow.json)
           REF=$(jq -r .ref workflow.json)
