@@ -20,8 +20,14 @@
 
 ### Settings
 
-1. update runs-on label (.github/workflows/*.yml)
+1. Update runs-on label (.github/workflows/*.yml)
 
 ### Applying it to your workflow
 
-1. add `uses: <your org>/github-actions-rebuilder@main` step
+```yaml
+- name: Rebuilder
+  uses: <your org>/github-actions-rebuilder@v0
+  with:
+    github_token: ${{ secrets.REBUILDER_ACCESSABLE_GITHUB_TOKEN }}
+  if: github.event_name == 'workflow_dispatch'
+```
