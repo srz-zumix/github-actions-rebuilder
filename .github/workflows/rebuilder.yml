@@ -41,7 +41,7 @@ jobs:
                 | tee workflow.json
       - name: Rebuild
         env:
-          GH_TOKEN: ${{ secrets.REBUILD_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.REBUILD_GITHUB_TOKEN }}
         run: |
           REPOSITORY=$(jq -r .repository workflow.json)
           REF=$(jq -r .ref workflow.json)
