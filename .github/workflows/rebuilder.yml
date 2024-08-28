@@ -23,6 +23,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr comment \
+              --repo "${{ github.repository }}" \
               --body "[Rebuilding](${{ github.event.repository.html_url }}/runs/${{ github.run_id }})" \
               ${{ github.event.issue.number }}
       - name: Get json
