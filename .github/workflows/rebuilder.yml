@@ -30,7 +30,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-            REBUILDER_REF=$(gh pr view --repo "${{ github.repository }}" --json headRefName --jq .headRefName "${{ github.event.issue.number }}")
+            REBUILDER_REF=$(gh pr view --repo "${{ github.repository }}" --json commits --jq .commits[0].oid "${{ github.event.issue.number }}")
             gh api \
                 -H "Accept: application/vnd.github.raw" \
                 "/repos/${{ github.repository }}/contents/payload.json?ref=${REBUILDER_REF}" \
