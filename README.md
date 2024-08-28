@@ -24,4 +24,4 @@
 
 ### Applying it to your workflow
 
-1. add github-actions-rebuilder step
+1. add `uses: srz-zumix/github-actions-rebuilder@v0` step
