@@ -24,19 +24,20 @@ jobs:
         run: |
           gh pr comment \
               --repo "${{ github.repository }}" \
-              --body "[Rebuilding](${{ github.event.repository.html_url }}/runs/${{ github.run_id }})" \
+              --body "[Rebuilding](${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }})" \
               ${{ github.event.issue.number }}
       - name: Get json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+            REBUILDER_REF=$(gh pr view ${{ github.event.issue.number }} --json headRefName --jq .headRefName)
             gh api \
                 -H "Accept: application/vnd.github.raw" \
-                "/repos/${{ github.repository }}/contents/payload.json?ref=${{ github.ref }}" \
+                "/repos/${{ github.repository }}/contents/payload.json?ref=${REBUILDER_REF}" \
                 > payload.json
             gh api \
                 -H "Accept: application/vnd.github.raw" \
-                "/repos/${{ github.repository }}/contents/workflow.json?ref=${{ github.ref }}" \
+                "/repos/${{ github.repository }}/contents/workflow.json?ref=${REBUILDER_REF}" \
                 > workflow.json
       - name: Rebuild
         env:
