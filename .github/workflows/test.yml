@@ -5,6 +5,10 @@ on:
       param1:
         type: string
         required: true
+      param2:
+        type: string
+        default: "hello"
+        required: false
 
 permissions:
   contents: write
