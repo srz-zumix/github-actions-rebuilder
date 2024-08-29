@@ -19,8 +19,8 @@ runs:
       id: params
       run: |
         WORKFLOW_PATH=${{ github.event.workflow }}
-        echo "path=.rebuilder^${{ github.run_id }}" > "${GITHUB_OUTPUT}"
-        echo "workflow=${WORKFLOW_PATH##*/}" > "${GITHUB_OUTPUT}"
+        echo "path=.rebuilder^${{ github.run_id }}" >> "${GITHUB_OUTPUT}"
+        echo "workflow=${WORKFLOW_PATH##*/}" >> "${GITHUB_OUTPUT}"
     - name: Checkout rebuilder repository
       uses: actions/checkout@v4
       with:
