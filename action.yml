@@ -4,6 +4,10 @@ inputs:
   github_token:
     description: 'GitHub token'
     default: ${{ github.token }}
+  pr:
+    description: 'Creaete rebuilder pull request'
+    default: true
+    type: boolean
   inputs-json:
     default: "${{ toJson(github.event.inputs) }}"
 
@@ -12,21 +16,25 @@ runs:
   steps:
     - name: Setup param
       shell: bash
-      id: setup
+      id: params
       run: |
+        WORKFLOW_PATH=${{ github.event.workflow }}
         echo "path=.rebuilder^${{ github.run_id }}" > "${GITHUB_OUTPUT}"
+        echo "workflow=${WORKFLOW_PATH##*/}" > "${GITHUB_OUTPUT}"
     - name: Checkout rebuilder repository
       uses: actions/checkout@v4
       with:
         repository: ${{ env.ACTION_REPO }}
         token: ${{ inputs.github_token }}
-        path: ${{ steps.setup.outputs.path }}
+        path: ${{ steps.params.outputs.path }}
       env:
         ACTION_REPO: ${{ github.action_repository }}
+      if: inputs.pr
     - name: Create payload.json
       shell: bash
       run: |
-        echo '${{ inputs.inputs-json }}' > "${{ steps.setup.outputs.path }}/payload.json"
+        echo '${{ inputs.inputs-json }}' > "${{ steps.params.outputs.path }}/payload.json"
+      if: inputs.pr
     - name: Create workflow json
       shell: bash
       run: |
@@ -36,11 +44,12 @@ runs:
           echo "  \"workflow\": \"${{ github.event.workflow }}\","
           echo "  \"repository\": \"${{ github.repository }}\""
           echo "}"
-        } > "${{ steps.setup.outputs.path }}/workflow.json"
+        } > "${{ steps.params.outputs.path }}/workflow.json"
+      if: inputs.pr
     - name: Create PR
       id: create-pr
       shell: bash
-      working-directory: ${{ steps.setup.outputs.path }}
+      working-directory: ${{ steps.params.outputs.path }}
       env:
         GH_TOKEN: ${{ inputs.github_token }}
       run: |
@@ -52,25 +61,35 @@ runs:
         git push -u origin HEAD
         HTTPS_URL=$(gh repo view --json url --jq .url)
         BRANCH=$(git branch --show-current)
-        WORKFLOW_PATH=${{ github.event.workflow }}
         {
           echo "Run url: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
-          echo "Workflow: ${{ github.event.repository.html_url }}/actions/workflows/${WORKFLOW_PATH##*/}"
+          echo "Workflow: ${{ github.event.repository.html_url }}/actions/workflows/${{ steps.params.outputs.workflow }}"
           echo "Rebuild: comment \`rebuild\`"
           echo "Edit inputs: Restore branch && edit [payload.json](${HTTPS_URL}/edit/${BRANCH}/payload.json) && Reopen PR"
-        } > body.txt 
+        } > body.txt
+
         gh pr create --title "Rebuild ${{ github.repository }}/actions/runs/${{ github.run_id }}" --body-file body.txt --draft
         PR_URL=$(gh pr view --json url --jq .url "${BRANCH}")
         echo "pr-url=${PR_URL}" >> "${GITHUB_OUTPUT}"
         gh pr close "${BRANCH}"
         git push origin --delete "${BRANCH}"
+      if: inputs.pr
     - name: Delete rebuilder repository
       shell: bash
       run: rm -rf "${{ steps.setup.outputs.path }}"
+      if: inputs.pr
     - name: Create Summary
       shell: bash
       env:
         PR_URL: ${{ steps.create-pr.outputs.pr-url }}
+        GH_COMMAND: gh workflow run --repo "${{ github.repository }}" --ref "${{ github.ref_name }}" --json "${{ steps.params.outputs.workflow }}"
       run: |
         echo "[Rebuild Workflow](${PR_URL})" >> "${GITHUB_STEP_SUMMARY}"
+      if: inputs.pr
+    - name: Create Gh CLI Command Summary
+      shell: bash
+      env:
+        GH_COMMAND: gh workflow run --repo "${{ github.repository }}" --ref "${{ github.ref_name }}" --json "${{ steps.params.outputs.workflow }}"
+      run: |
+        echo "\`echo \"$(echo '${{ inputs.inputs-json }}' | jq -c)\" | ${GH_COMMAND}\`" >> "${GITHUB_STEP_SUMMARY}"
 
