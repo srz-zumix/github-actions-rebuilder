@@ -98,5 +98,9 @@ runs:
         GH_COMMAND: gh workflow run --repo "${{ github.repository }}" --ref "${{ github.ref_name }}" --json "${{ steps.params.outputs.workflow }}"
       run: |
         # Create Gh CLI Command Summary
-        echo "\`echo \"$(echo '${{ inputs.inputs-json }}' | jq -c)\" | ${GH_COMMAND}\`" >> "${GITHUB_STEP_SUMMARY}"
+        {
+          echo '```sh'
+          echo "echo \'$(echo '${{ inputs.inputs-json }}' | jq -c)\' | ${GH_COMMAND}"
+          echo '```'
+        } >> "${GITHUB_STEP_SUMMARY}"
 
