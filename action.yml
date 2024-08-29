@@ -100,7 +100,7 @@ runs:
         # Create Gh CLI Command Summary
         {
           echo '```sh'
-          echo "echo \'$(echo '${{ inputs.inputs-json }}' | jq -c)\' | ${GH_COMMAND}"
+          echo "echo '$(echo '${{ inputs.inputs-json }}' | jq -c)' | ${GH_COMMAND}"
           echo '```'
         } >> "${GITHUB_STEP_SUMMARY}"
 
