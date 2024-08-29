@@ -4,10 +4,6 @@ inputs:
   github_token:
     description: 'GitHub token'
     default: ${{ github.token }}
-  pr:
-    description: 'Creaete rebuilder pull request'
-    default: true
-    type: boolean
   inputs-json:
     default: "${{ toJson(github.event.inputs) }}"
 
@@ -30,13 +26,11 @@ runs:
         path: ${{ steps.params.outputs.path }}
       env:
         ACTION_REPO: ${{ github.action_repository }}
-      if: inputs.pr
     - name: Create payload.json
       shell: bash
       run: |
         # Create payload.json
         echo '${{ inputs.inputs-json }}' > "${{ steps.params.outputs.path }}/payload.json"
-      if: inputs.pr
     - name: Create workflow json
       shell: bash
       run: |
@@ -48,7 +42,6 @@ runs:
           echo "  \"repository\": \"${{ github.repository }}\""
           echo "}"
         } > "${{ steps.params.outputs.path }}/workflow.json"
-      if: inputs.pr
     - name: Create PR
       id: create-pr
       shell: bash
@@ -77,7 +70,6 @@ runs:
         echo "pr-url=${PR_URL}" >> "${GITHUB_OUTPUT}"
         gh pr close "${BRANCH}"
         git push origin --delete "${BRANCH}"
-      if: inputs.pr
     - name: Delete rebuilder repository
       shell: bash
       run: |
@@ -91,16 +83,7 @@ runs:
       run: |
         # Create Summary
         echo "[Rebuild Workflow](${PR_URL})" >> "${GITHUB_STEP_SUMMARY}"
-      if: inputs.pr
-    - name: Create Gh CLI Command Summary
-      shell: bash
-      env:
-        GH_COMMAND: gh workflow run --repo "${{ github.repository }}" --ref "${{ github.ref_name }}" --json "${{ steps.params.outputs.workflow }}"
-      run: |
-        # Create Gh CLI Command Summary
-        {
-          echo '```sh'
-          echo "echo '$(echo '${{ inputs.inputs-json }}' | jq -c)' | ${GH_COMMAND}"
-          echo '```'
-        } >> "${GITHUB_STEP_SUMMARY}"
-
+    - name: Rebuild Summary
+      uses: srz-zumix/actions-rebuild-summary@v0
+      with:
+        inputs-json: ${{ inputs.inputs-json }}
