@@ -59,7 +59,7 @@ runs:
           echo "Rebuild: comment \`rebuild\`"
           echo "Edit inputs: Restore branch && edit [payload.json](${HTTPS_URL}/edit/${BRANCH}/payload.json) && Reopen PR"
         } > body.txt 
-        gh pr create --title "Rebuild ${{ github.event.repository.html_url }}/runs/${{ github.run_id }}" --body-file body.txt --draft
+        gh pr create --title "Rebuild ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}" --body-file body.txt --draft
         PR_URL=$(gh pr view --json url --jq .url "${BRANCH}")
         echo "pr-url=${PR_URL}" >> "${GITHUB_OUTPUT}"
         gh pr close "${BRANCH}"
