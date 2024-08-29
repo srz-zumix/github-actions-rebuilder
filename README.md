@@ -26,7 +26,7 @@
 
 ```yaml
 - name: Rebuilder
-  uses: <your org>/github-actions-rebuilder@v0
+  uses: <your org>/github-actions-rebuilder@main
   with:
     github_token: ${{ secrets.REBUILDER_ACCESSABLE_GITHUB_TOKEN }}
   if: github.event_name == 'workflow_dispatch'
