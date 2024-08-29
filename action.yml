@@ -18,6 +18,7 @@ runs:
       shell: bash
       id: params
       run: |
+        # Setup param
         WORKFLOW_PATH=${{ github.event.workflow }}
         echo "path=.rebuilder^${{ github.run_id }}" >> "${GITHUB_OUTPUT}"
         echo "workflow=${WORKFLOW_PATH##*/}" >> "${GITHUB_OUTPUT}"
@@ -33,11 +34,13 @@ runs:
     - name: Create payload.json
       shell: bash
       run: |
+        # Create payload.json
         echo '${{ inputs.inputs-json }}' > "${{ steps.params.outputs.path }}/payload.json"
       if: inputs.pr
     - name: Create workflow json
       shell: bash
       run: |
+        # Create workflow json
         {
           echo "{"
           echo "  \"ref\": \"${{ github.ref_name }}\","
@@ -53,6 +56,7 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github_token }}
       run: |
+        # Create PR
         git switch -C "rebuild/${{ github.repository }}/${{ github.run_id }}"
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -76,14 +80,16 @@ runs:
       if: inputs.pr
     - name: Delete rebuilder repository
       shell: bash
-      run: rm -rf "${{ steps.setup.outputs.path }}"
+      run: |
+        # Delete rebuilder repository
+        rm -rf "${{ steps.setup.outputs.path }}"
       if: inputs.pr
     - name: Create Summary
       shell: bash
       env:
         PR_URL: ${{ steps.create-pr.outputs.pr-url }}
-        GH_COMMAND: gh workflow run --repo "${{ github.repository }}" --ref "${{ github.ref_name }}" --json "${{ steps.params.outputs.workflow }}"
       run: |
+        # Create Summary
         echo "[Rebuild Workflow](${PR_URL})" >> "${GITHUB_STEP_SUMMARY}"
       if: inputs.pr
     - name: Create Gh CLI Command Summary
@@ -91,5 +97,6 @@ runs:
       env:
         GH_COMMAND: gh workflow run --repo "${{ github.repository }}" --ref "${{ github.ref_name }}" --json "${{ steps.params.outputs.workflow }}"
       run: |
+        # Create Gh CLI Command Summary
         echo "\`echo \"$(echo '${{ inputs.inputs-json }}' | jq -c)\" | ${GH_COMMAND}\`" >> "${GITHUB_STEP_SUMMARY}"
 
