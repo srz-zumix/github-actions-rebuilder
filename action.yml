@@ -19,7 +19,7 @@ runs:
         echo "path=.rebuilder^${{ github.run_id }}" >> "${GITHUB_OUTPUT}"
         echo "workflow=${WORKFLOW_PATH##*/}" >> "${GITHUB_OUTPUT}"
     - name: Checkout rebuilder repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: ${{ env.ACTION_REPO }}
         token: ${{ inputs.github_token }}
